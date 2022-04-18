@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  labels:
+    app: fil-rouge
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        imagePullPolicy: IfNotPresent
+        image: docker.io/istio/examples-bookinfo-mysqldb:1.16.2
+        args: ["--default-authentication-plugin","mysql_native_password"]
+        env:
+        #- name: MYSQL_ROOT_PASSWORD
+        #  value: "pass"
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-root-pwd
+              key: password
+        volumeMounts:
+          - mountPath: /var/lib/mysql
+            name: mysql-volume
+      volumes:
+      - name: mysql-volume
+        hostPath:
+          path: "/var/lib/mysql"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+spec:
+  selector:
+    app: mysql
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysql-root-password
+type: Opaque
+data:
+  username: cm9vdA==
+  password: MWYyZDFlMmU2N2Rm

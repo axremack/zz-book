@@ -1,0 +1,42 @@
+version: "1.0"
+
+services:
+  mongodb:
+    build: src/mongodb/
+    image: mongodb:latest
+
+  sqldb:
+    build: src/mysql/
+    image: mysql:latest
+    environment:
+      - MYSQL_ROOT_PASSWORD="pass"
+        
+  details:
+    build: src/details/
+    image: details:latest # Nom de l'image créée au compose
+    ports: 
+      - "9080"
+    
+  productpage:
+    build: src/productpage/
+    image: productpage:latest
+    ports: 
+      - "9080:9080"
+#    environment:
+#      REVIEWS_HOSTNAME: "reviews"
+    links:
+      - details
+      - reviews
+
+  ratings:
+    build: src/ratings/
+    image: ratings:latest
+    ports: 
+      - "9080"
+
+  reviews:
+    image: docker.io/istio/examples-bookinfo-reviews-v1:latest
+    links: 
+      - ratings
+    
+

@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb
+  labels:
+    app: fil-rouge
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+      - name: mongodb
+        imagePullPolicy: IfNotPresent
+        image: docker.io/istio/examples-bookinfo-mongodb:1.16.2
+        volumeMounts:
+        - mountPath: /data/db
+          name: mongo-volume
+      volumes:
+      - name: mongo-volume
+        hostPath:
+          path: "/data/db"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb
+spec:
+  selector:
+    app: mongodb
+  ports:
+    - protocol: TCP
+      port: 27017
+      targetPort: 27017
